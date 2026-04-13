@@ -1,7 +1,12 @@
 import React from 'react'
 import { Plus, Zap } from 'lucide-react'
+import { useBoard } from '../context/BoardContext'
 
 export default function Header() {
+  const { tickets, openNewModal } = useBoard()
+  const total = tickets.length
+  const done = tickets.filter(t => t.column === 'done').length
+
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
       <div className="flex items-center gap-3">
@@ -15,7 +20,7 @@ export default function Header() {
           </span>
         </div>
         <span className="hidden sm:block text-sm text-gray-400 ml-2">
-          0/0 tickets completed
+          {done}/{total} tickets completed
         </span>
       </div>
 
@@ -24,7 +29,10 @@ export default function Header() {
           <span className="w-2 h-2 rounded-full bg-teal-400 inline-block"></span>
           AI Coach active
         </div>
-        <button className="flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+        <button
+          onClick={() => openNewModal()}
+          className="flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+        >
           <Plus size={15} />
           New ticket
         </button>
