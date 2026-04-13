@@ -1,5 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Trash2, ChevronRight, ChevronLeft, Sparkles, AlertTriangle, AlertCircle } from 'lucide-react'
+import { useBoard } from '../context/BoardContext'
+
+const COLUMNS = ['todo', 'inprogress', 'done']
 
 const PRIORITY_CONFIG = {
   low:      { label: 'Low',      classes: 'bg-gray-100 text-gray-600' },
@@ -18,11 +21,26 @@ const POINTS_COLOR = {
 }
 
 export default function TicketCard({ ticket }) {
+  const { openEditModal, deleteTicket, moveTicket } = useBoard()
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const colIdx = COLUMNS.indexOf(ticket.column)
   const priority = PRIORITY_CONFIG[ticket.priority] || PRIORITY_CONFIG.medium
 
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all">
+  const handleDelete = (e) => {
+    e.stopPropagation()
+    if (confirmDelete) {
+      deleteTicket(ticket.id)
+    } else {
+      setConfirmDelete(true)
+      setTimeout(() => setConfirmDelete(false), 2500)
+    }
+  }
 
+  return (
+    <div
+      onClick={() => openEditModal(ticket)}
+      className="bg-white border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all"
+    >
       {/* Title row */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <h3 className="text-sm font-medium text-gray-900 leading-snug flex-1">
@@ -64,14 +82,35 @@ export default function TicketCard({ ticket }) {
       {/* Actions */}
       <div className="flex items-center justify-between pt-2 border-t border-gray-100">
         <div className="flex items-center gap-1">
-          <button className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              if (colIdx > 0) moveTicket(ticket.id, COLUMNS[colIdx - 1])
+            }}
+            disabled={colIdx === 0}
+            className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
             <ChevronLeft size={14} />
           </button>
-          <button className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              if (colIdx < COLUMNS.length - 1) moveTicket(ticket.id, COLUMNS[colIdx + 1])
+            }}
+            disabled={colIdx === COLUMNS.length - 1}
+            className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
             <ChevronRight size={14} />
           </button>
         </div>
-        <button className="p-1 rounded text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors">
+        <button
+          onClick={handleDelete}
+          className={`p-1 rounded transition-colors ${
+            confirmDelete
+              ? 'text-red-500 bg-red-50'
+              : 'text-gray-300 hover:text-red-400 hover:bg-red-50'
+          }`}
+        >
           <Trash2 size={13} />
         </button>
       </div>
