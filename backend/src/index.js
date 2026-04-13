@@ -4,6 +4,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import { ticketRouter } from './routes/tickets.js'
+import { aiRouter } from './routes/ai.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 const app = express()
@@ -20,15 +21,13 @@ app.use(cors({
 
 app.use(express.json())
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-// Routes
 app.use('/api/tickets', ticketRouter)
+app.use('/api/ai', aiRouter)
 
-// 404
 app.use((req, res) => {
   res.status(404).json({ error: `Route ${req.method} ${req.path} not found` })
 })
