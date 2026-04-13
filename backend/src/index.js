@@ -1,0 +1,34 @@
+import 'dotenv/config'
+import express from 'express'
+import cors from 'cors'
+import helmet from 'helmet'
+import morgan from 'morgan'
+
+const app = express()
+const PORT = process.env.PORT || 3001
+
+app.use(helmet())
+app.use(morgan('dev'))
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}))
+
+app.use(express.json())
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
+// 404
+app.use((req, res) => {
+  res.status(404).json({ error: `Route ${req.method} ${req.path} not found` })
+})
+
+app.listen(PORT, () => {
+  console.log(`\n🚀 SmartBacklog API running on http://localhost:${PORT}`)
+  console.log(`   OpenAI key: ${process.env.OPENAI_API_KEY ? '✓ loaded' : '✗ missing'}\n`)
+})
