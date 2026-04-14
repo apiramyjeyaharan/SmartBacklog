@@ -3,6 +3,8 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
+import { ticketRouter } from './routes/tickets.js'
+import { errorHandler } from './middleware/errorHandler.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -23,10 +25,15 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
+// Routes
+app.use('/api/tickets', ticketRouter)
+
 // 404
 app.use((req, res) => {
   res.status(404).json({ error: `Route ${req.method} ${req.path} not found` })
 })
+
+app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`\n🚀 SmartBacklog API running on http://localhost:${PORT}`)
